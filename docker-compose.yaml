@@ -1,0 +1,26 @@
+version: '3.1'
+services:
+
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=caching_sha2_password
+    restart: always
+    environment:
+      - MYSQL_DATABASE=scheduler
+      - MYSQL_ROOT_PASSWORD=notroot
+    ports:
+      - "3306:3306"
+#    volumes:
+#      - scheduledata:/var/lib/mysql
+
+  flyway_mysql:
+    image: arojunior/flyway:5.2.4
+    command: "wait-for-it --timeout=60 --strict mysql:3306 -- flyway migrate"
+    volumes:
+      - ./docker/mysql/migrations/config:/flyway/conf
+      - ./docker/mysql/migrations/sql:/flyway/sql
+    depends_on:
+      - mysql
+
+#volumes:
+#  scheduledata:
